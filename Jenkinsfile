@@ -22,7 +22,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Compiling...'
-                bat 'mvn clean compile'
+                bat 'mvn clean compile > target/buildLog.txt 2>&1'
             }
         }
 
@@ -36,10 +36,10 @@ pipeline {
 
     post {
         always {
-            // Archive all log files
+            // Securely archive logs without rawBuild
             archiveArtifacts artifacts: 'target/*.txt', fingerprint: true
 
-            // Publish TestNG report
+            //  Publish HTML reports (TestNG and Extent)
             publishHTML(target: [
                 reportDir: 'target/surefire-reports',
                 reportFiles: 'index.html',
@@ -47,8 +47,6 @@ pipeline {
                 keepAll: true,
                 alwaysLinkToLastBuild: true
             ])
-
-            // Publish Extent report
             publishHTML(target: [
                 reportDir: 'target/test-output',
                 reportFiles: 'ExtentReport.html',
@@ -57,19 +55,12 @@ pipeline {
                 alwaysLinkToLastBuild: true
             ])
 
-            // Publish Allure results
+            //  Publish Allure results if available
             allure([
                 includeProperties: false,
                 jdk: '',
                 results: [[path: 'target/allure-results']]
             ])
-
-            // Capture full Jenkins console output
-            script {
-                def fullLog = currentBuild.rawBuild.getLog(9999).join('\n')
-                def logFile = new File("${env.WORKSPACE}\\target\\fullConsoleLog.txt")
-                logFile.text = fullLog
-            }
         }
     }
 }
