@@ -8,7 +8,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/arpita030388/JenkinsWithLLM.git'
+                git url: 'https://github.com/arpita030388/jenkinsSetup.git'
+            }
+        }
+
+        stage('Prepare Target Folder') {
+            steps {
+                echo 'Ensuring target folder exists...'
+                bat 'mkdir target'
             }
         }
 
@@ -21,7 +28,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Testing...'
+                echo 'Running tests...'
                 bat 'mvn test > target/testLog.txt 2>&1'
             }
         }
@@ -29,11 +36,10 @@ pipeline {
 
     post {
         always {
-                script {
-                        def logFile = new File("${env.WORKSPACE}\\target\\fullConsoleLog.txt")
-                        logFile.text = currentBuild.rawBuild.getLog(9999).join('\n')
-                    }
+            // Archive all log files
+            archiveArtifacts artifacts: 'target/*.txt', fingerprint: true
 
+            // Publish TestNG report
             publishHTML(target: [
                 reportDir: 'target/surefire-reports',
                 reportFiles: 'index.html',
@@ -42,6 +48,7 @@ pipeline {
                 alwaysLinkToLastBuild: true
             ])
 
+            // Publish Extent report
             publishHTML(target: [
                 reportDir: 'target/test-output',
                 reportFiles: 'ExtentReport.html',
@@ -50,11 +57,19 @@ pipeline {
                 alwaysLinkToLastBuild: true
             ])
 
+            // Publish Allure results
             allure([
                 includeProperties: false,
                 jdk: '',
                 results: [[path: 'target/allure-results']]
             ])
+
+            // Capture full Jenkins console output
+            script {
+                def fullLog = currentBuild.rawBuild.getLog(9999).join('\n')
+                def logFile = new File("${env.WORKSPACE}\\target\\fullConsoleLog.txt")
+                logFile.text = fullLog
+            }
         }
     }
 }
