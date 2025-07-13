@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/arpita030388/JenkinsWithLLM.git'
+                git url: 'https://github.com/arpita030388/JenkinsWithLLM.git', credentialsId: 'github-creds'
             }
         }
 
@@ -36,10 +36,10 @@ pipeline {
 
     post {
         always {
-            // Securely archive logs without rawBuild
+            // ✅ Securely archive logs without rawBuild
             archiveArtifacts artifacts: 'target/*.txt', fingerprint: true
 
-            //  Publish HTML reports (TestNG and Extent)
+            // ✅ Publish HTML reports (TestNG and Extent)
             publishHTML(target: [
                 reportDir: 'target/surefire-reports',
                 reportFiles: 'index.html',
@@ -55,7 +55,7 @@ pipeline {
                 alwaysLinkToLastBuild: true
             ])
 
-            //  Publish Allure results if available
+            // ✅ Publish Allure results if available
             allure([
                 includeProperties: false,
                 jdk: '',
