@@ -12,13 +12,6 @@ pipeline {
             }
         }
 
-        stage('Prepare Target Folder') {
-            steps {
-                echo 'Ensuring target folder exists...'
-                bat 'mkdir target'
-            }
-        }
-
         stage('Build') {
             steps {
                 echo 'Compiling...'
