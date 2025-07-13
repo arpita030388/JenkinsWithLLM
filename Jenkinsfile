@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/arpita030388/JenkinsWithLLM.git', credentialsId: 'github-creds'
+                git url: 'https://github.com/arpita030388/JenkinsWithLLM.git'
             }
         }
 
