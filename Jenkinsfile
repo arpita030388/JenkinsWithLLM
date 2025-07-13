@@ -22,7 +22,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Compiling...'
-                bat 'mvn clean compile > target/buildLog.txt 2>&1'
+                bat 'mvn clean compile'
             }
         }
 
