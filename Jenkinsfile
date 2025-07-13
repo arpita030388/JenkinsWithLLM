@@ -29,7 +29,10 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'target/*.txt', fingerprint: true
+                script {
+                        def logFile = new File("${env.WORKSPACE}\\target\\fullConsoleLog.txt")
+                        logFile.text = currentBuild.rawBuild.getLog(9999).join('\n')
+                    }
 
             publishHTML(target: [
                 reportDir: 'target/surefire-reports',
